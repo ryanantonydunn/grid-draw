@@ -1,29 +1,23 @@
 {
   "name": "grid-draw",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "serve": "vite preview",
-    "test": "vitest"
+    "serve": "vite preview"
   },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@gsimone/codesandbox-vite-plugin": "^0.0.2",
-    "@testing-library/jest-dom": "^6.1.4",
-    "@testing-library/react": "^14.1.0",
-    "@types/react": "^18.2.37",
-    "@types/react-dom": "^18.2.15",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react": "^4.1.1",
-    "autoprefixer": "^10.4.16",
-    "jsdom": "^22.1.0",
-    "postcss": "^8.4.31",
-    "tailwindcss": "^3.3.5",
-    "typescript": "^5.2.2",
-    "vite": "^4.5.0",
-    "vitest": "^0.34.6"
+    "jsdom": "^24.0.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.4.2",
+    "vite": "^5.1.6"
   }
 }
