@@ -22,14 +22,6 @@ export function Canvas() {
 
   const [hoverPosition, setHoverPosition] = React.useState<Position | null>(null);
 
-  React.useEffect(() => {
-    document.body.onkeydown = (e) => {
-      if (e.key === "Escape") {
-        clearActivePosition();
-      }
-    };
-  }, []);
-
   if (!image) return null;
 
   return (

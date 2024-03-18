@@ -2,6 +2,7 @@ import React from "react";
 import {
   useAddNewImage,
   useCanvasOptions,
+  useClearActivePosition,
   useCurrentImage,
   useDeleteImage,
   useDuplicateImage,
@@ -22,6 +23,8 @@ import Copy from "@spectrum-icons/workflow/Copy";
 import Edit from "@spectrum-icons/workflow/Edit";
 import SaveFloppy from "@spectrum-icons/workflow/SaveFloppy";
 import Cancel from "@spectrum-icons/workflow/Cancel";
+import Undo from "@spectrum-icons/workflow/Undo";
+import Redo from "@spectrum-icons/workflow/Redo";
 
 export function Panel() {
   const lineOptions = useLineOptions();
@@ -35,6 +38,10 @@ export function Panel() {
   const deleteImage = useDeleteImage();
   const setImageName = useSetImageName();
   const setCurrentImage = useSetCurrentImage();
+  const clearActivePosition = useClearActivePosition();
+
+  const letters1 = ["q", "w", "e", "r", "t", "y", "u", "i", "o"];
+  const letters2 = ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";"];
 
   const [editingImageName, setEditingImageName] = React.useState(false);
   const [tempImageName, setTempImageName] = React.useState("");
@@ -42,19 +49,24 @@ export function Panel() {
     setTempImageName(image?.name || "");
   }, [image]);
 
+  // do some nice keyboard shortcuts
+  React.useEffect(() => {
+    document.body.onkeydown = (e) => {
+      if (e.key === "Escape") {
+        clearActivePosition();
+      } else if ([1, 2, 3, 4, 5, 6, 7, 8].includes(Number(e.key))) {
+        setLineOption({ width: Number(e.key) });
+      } else if (letters1.indexOf(e.key) !== -1) {
+        setLineOption({ color: colorHues[letters1.indexOf(e.key)] });
+      } else if (letters2.indexOf(e.key) !== -1) {
+        setLineOption({ opacity: letters2.indexOf(e.key) * 0.1 + 0.1 });
+      }
+    };
+  }, []);
+
   return (
-    <div className="absolute bottom-0 left-0 w-full p-1 bg-slate-800 text-slate-100 flex items-center">
+    <div className="absolute bottom-0 left-0 w-full p-1 px-2 bg-slate-800 text-slate-100 flex items-center">
       {/** Line options */}
-      <div className="pr-2">
-        <label className="text-xs block">Color</label>
-        <FormSelect onChange={(e) => setLineOption({ color: e.target.value as ColorHue })} value={lineOptions.color}>
-          {colorHues.map((hue) => (
-            <option key={hue} value={hue}>
-              {hue}
-            </option>
-          ))}
-        </FormSelect>
-      </div>
       <div className="pr-2">
         <label className="text-xs block">Width</label>
         <FormSelect
@@ -65,6 +77,16 @@ export function Panel() {
           {Array.from({ length: 8 }).map((_, i) => (
             <option key={i + 1} value={i + 1}>
               {i + 1}
+            </option>
+          ))}
+        </FormSelect>
+      </div>
+      <div className="pr-2">
+        <label className="text-xs block">Color</label>
+        <FormSelect onChange={(e) => setLineOption({ color: e.target.value as ColorHue })} value={lineOptions.color}>
+          {colorHues.map((hue) => (
+            <option key={hue} value={hue}>
+              {hue}
             </option>
           ))}
         </FormSelect>
@@ -102,6 +124,29 @@ export function Panel() {
             </option>
           ))}
         </FormSelect>
+      </div>
+
+      {/** Undo redo */}
+      <div className="ml-2 mr-4 bg-slate-700 w-px self-stretch"></div>
+      <div className="pr-2">
+        <Button
+          className="mr-2"
+          onClick={() => {
+            //
+          }}
+          title="Undo"
+        >
+          <Undo aria-label="undo" size="S" />
+        </Button>
+        <Button
+          className="mr-2"
+          onClick={() => {
+            //
+          }}
+          title="Redo"
+        >
+          <Redo aria-label="redo" size="S" />
+        </Button>
       </div>
 
       {/** Image options */}

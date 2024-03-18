@@ -1,6 +1,17 @@
 export type Position = [number, number];
 
-export const colorHues = ["red", "green", "blue", "gray"] as const;
+export const colorHues = [
+  "gray",
+  "red",
+  "orange",
+  "yellow",
+  "green",
+  "teal",
+  "cyan",
+  "blue",
+  "purple",
+  "pink",
+] as const;
 
 export type ColorHue = (typeof colorHues)[number];
 
