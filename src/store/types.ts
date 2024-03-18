@@ -41,12 +41,14 @@ export type Action = ActionCreateLine;
 
 export interface Image {
   id: string;
+  name: string;
+  activePosition: Position | null;
   lines: Line[];
-  history: Action[];
 }
 
-export interface Store {
+export interface AppState {
   currentImage: string;
   images: Image[];
-  options: CanvasOptions;
+  canvasOptions: CanvasOptions;
+  lineOptions: LineOptions;
 }
