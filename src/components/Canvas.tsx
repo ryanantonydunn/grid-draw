@@ -24,6 +24,8 @@ export function Canvas() {
 
   if (!image) return null;
 
+  const { lines, activePosition } = image.state.present;
+
   return (
     <div
       className="h-screen"
@@ -51,12 +53,12 @@ export function Canvas() {
       }}
     >
       <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-        {image.lines.map((line, i) => (
+        {lines.map((line, i) => (
           <DrawLine key={i} {...line} />
         ))}
-        <DrawLine start={image.activePosition} end={hoverPosition} {...lineOptions} />
+        <DrawLine start={activePosition} end={hoverPosition} {...lineOptions} />
         <DrawCircle
-          position={image.activePosition}
+          position={activePosition}
           color={canvasOptions.selectedCircleColor}
           size={canvasOptions.selectedCircleSize}
         />

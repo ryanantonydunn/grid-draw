@@ -7,11 +7,14 @@ import {
   clickPosition,
   deleteImage,
   duplicateImage,
+  redo,
   setCanvasOption,
   setCurrentImage,
   setImageName,
   setLineOption,
+  undo,
 } from "./reducer";
+import { PayloadAction } from "@reduxjs/toolkit";
 
 export const useCanvasOptions = () => {
   return useSelector((state: AppState) => state.canvasOptions);
@@ -72,6 +75,20 @@ export const useClickPosition = () => {
 export const useClearActivePosition = () => {
   const dispatch = useDispatch();
   return () => dispatch(clearActivePosition());
+};
+
+export const useUndo = (): (() => PayloadAction) | null => {
+  const dispatch = useDispatch();
+  const image = useCurrentImage();
+  if (!image || !image.state.past.length) return null;
+  return () => dispatch(undo());
+};
+
+export const useRedo = (): (() => PayloadAction) | null => {
+  const dispatch = useDispatch();
+  const image = useCurrentImage();
+  if (!image || !image.state.future.length) return null;
+  return () => dispatch(redo());
 };
 
 /**

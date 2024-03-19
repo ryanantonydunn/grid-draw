@@ -50,11 +50,19 @@ export interface ActionCreateLine {
 
 export type Action = ActionCreateLine;
 
+export interface ImageState {
+  activePosition: Position | null;
+  lines: Line[];
+}
+
 export interface Image {
   id: string;
   name: string;
-  activePosition: Position | null;
-  lines: Line[];
+  state: {
+    past: ImageState[];
+    present: ImageState;
+    future: ImageState[];
+  };
 }
 
 export interface AppState {
@@ -63,3 +71,5 @@ export interface AppState {
   canvasOptions: CanvasOptions;
   lineOptions: LineOptions;
 }
+
+export const NAME_LIMIT = 30;

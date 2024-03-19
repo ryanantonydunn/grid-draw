@@ -1,9 +1,8 @@
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
 import colors from "tailwindcss/colors";
-import { createNewImage, getCurrentImage, getNewLine } from "./helpers";
-import { AppState, CanvasOptions, LineOptions, Position } from "./types";
-import { v4 as uuidv4 } from "uuid";
+import { createNewImage, getCurrentImage, getImageDuplicate, getNewLine, snapshotImageStateForUndo } from "./helpers";
+import { AppState, CanvasOptions, LineOptions, NAME_LIMIT, Position } from "./types";
 
 const initialState: AppState = {
   currentImage: "0",
@@ -34,7 +33,7 @@ export const mainSlice = createSlice({
     setImageName: (state, action: PayloadAction<string>) => {
       const image = getCurrentImage(state);
       if (!image) return;
-      image.name = action.payload;
+      image.name = action.payload.slice(0, NAME_LIMIT);
     },
     addNewImage: (state) => {
       const newImage = createNewImage();
@@ -47,17 +46,10 @@ export const mainSlice = createSlice({
       state.currentImage = state.images[0]?.id || "";
     },
     duplicateImage: (state) => {
-      const image = getCurrentImage(state);
-      if (!image) return;
-      const id = uuidv4();
-      const newImage = {
-        ...image,
-        id,
-        lines: image.lines.map((l) => ({ ...l })),
-        name: `${image.name} (Copy)`,
-      };
-      state.images.push(newImage);
-      state.currentImage = id;
+      const dupe = getImageDuplicate(state);
+      if (!dupe) return;
+      state.images.push(dupe);
+      state.currentImage = dupe.id;
     },
     setCanvasOption: (state, action: PayloadAction<Partial<CanvasOptions>>) => {
       state.canvasOptions = { ...state.canvasOptions, ...action.payload };
@@ -67,26 +59,48 @@ export const mainSlice = createSlice({
     },
     clearActivePosition: (state) => {
       const image = getCurrentImage(state);
-      if (!image) return;
-      image.activePosition = null;
+      if (!image || image.state.present.activePosition === null) return;
+      snapshotImageStateForUndo(state);
+      image.state.present.activePosition = null;
     },
     clickPosition: (state, action: PayloadAction<Position>) => {
       const image = getCurrentImage(state);
       if (!image) return;
+      snapshotImageStateForUndo(state);
 
       // if there is a new line to create
       const newLine = getNewLine(state, action.payload);
       if (newLine && image) {
-        image.lines.push(newLine);
-        image.activePosition = action.payload;
+        image.state.present.lines.push(newLine);
+        image.state.present.activePosition = action.payload;
       } else {
         // if there is no new line, set the active position or clear it if is same
-        if (action.payload === image.activePosition) {
-          image.activePosition = null;
+        if (action.payload === image.state.present.activePosition) {
+          image.state.present.activePosition = null;
         } else {
-          image.activePosition = action.payload;
+          image.state.present.activePosition = action.payload;
         }
       }
+    },
+    undo: (state) => {
+      const image = getCurrentImage(state);
+      if (!image || !image.state.past.length) return;
+
+      // move present to future
+      image.state.future.unshift(image.state.present);
+
+      // move previous past to present
+      image.state.present = image.state.past.splice(-1, 1)[0];
+    },
+    redo: (state) => {
+      const image = getCurrentImage(state);
+      if (!image || !image.state.future.length) return;
+
+      // move present to past
+      image.state.past.push(image.state.present);
+
+      // move previous future to present
+      image.state.present = image.state.future.splice(0, 1)[0];
     },
   },
 });
@@ -101,5 +115,7 @@ export const {
   setLineOption,
   clickPosition,
   clearActivePosition,
+  undo,
+  redo,
 } = mainSlice.actions;
 export const mainReducer = mainSlice.reducer;

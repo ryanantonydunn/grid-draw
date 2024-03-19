@@ -1,4 +1,4 @@
-import { AppState, Image, Line, Position } from "./types";
+import { AppState, Image, ImageState, Line, NAME_LIMIT, Position } from "./types";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -6,10 +6,10 @@ import { v4 as uuidv4 } from "uuid";
  */
 export function getNewLine(state: AppState, position: Position): Line | null {
   const image = getCurrentImage(state);
-  if (!image || !image.activePosition) return null;
+  if (!image || !image.state.present.activePosition) return null;
   return {
     ...state.lineOptions,
-    start: image.activePosition,
+    start: image.state.present.activePosition,
     end: position,
   };
 }
@@ -19,6 +19,48 @@ export function getNewLine(state: AppState, position: Position): Line | null {
  */
 export function getCurrentImage(state: AppState): Image | null {
   return state.images.find((img) => img.id === state.currentImage) || null;
+}
+
+/**
+ * Copy current image state snapshot to past
+ * (Directly mutates state arg as used in redux immer context)
+ */
+const UNDO_LIMIT = 200;
+
+export function snapshotImageStateForUndo(state: AppState): void {
+  const image = getCurrentImage(state);
+  if (!image) return;
+  const present = duplicateImageState(image.state.present);
+  image.state.past = [...image.state.past, present].slice(-UNDO_LIMIT);
+  image.state.future = [];
+}
+
+/**
+ * Get full copy of current image present state
+ */
+export function duplicateImageState(state: ImageState): ImageState {
+  return {
+    lines: state.lines.map((l) => ({ ...l })),
+    activePosition: state.activePosition,
+  };
+}
+
+/**
+ * Get duplicate of current image
+ */
+export function getImageDuplicate(state: AppState): Image | null {
+  const image = getCurrentImage(state);
+  if (!image) return null;
+  const id = uuidv4();
+  return {
+    id,
+    name: `${image.name.slice(0, NAME_LIMIT - 7)} (Copy)`,
+    state: {
+      past: image.state.past.map(duplicateImageState),
+      present: duplicateImageState(image.state.present),
+      future: image.state.future.map(duplicateImageState),
+    },
+  };
 }
 
 /**
@@ -45,7 +87,13 @@ export function createNewImage(id?: string): Image {
   return {
     id: id || uuidv4(),
     name: "New Image",
-    lines: [],
-    activePosition: null,
+    state: {
+      past: [],
+      present: {
+        lines: [],
+        activePosition: null,
+      },
+      future: [],
+    },
   };
 }

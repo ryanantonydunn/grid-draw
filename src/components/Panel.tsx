@@ -8,10 +8,12 @@ import {
   useDuplicateImage,
   useImages,
   useLineOptions,
+  useRedo,
   useSetCanvasOption,
   useSetCurrentImage,
   useSetImageName,
   useSetLineOption,
+  useUndo,
 } from "../store/hooks";
 import { ColorHue, colorHues } from "../store/types";
 import { Button } from "./atoms/Button";
@@ -39,6 +41,8 @@ export function Panel() {
   const setImageName = useSetImageName();
   const setCurrentImage = useSetCurrentImage();
   const clearActivePosition = useClearActivePosition();
+  const undo = useUndo();
+  const redo = useRedo();
 
   const letters1 = ["q", "w", "e", "r", "t", "y", "u", "i", "o"];
   const letters2 = ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";"];
@@ -130,18 +134,20 @@ export function Panel() {
       <div className="ml-2 mr-4 bg-slate-700 w-px self-stretch"></div>
       <div className="pr-2">
         <Button
+          disabled={!undo}
           className="mr-2"
           onClick={() => {
-            //
+            undo && undo();
           }}
           title="Undo"
         >
           <Undo aria-label="undo" size="S" />
         </Button>
         <Button
+          disabled={!redo}
           className="mr-2"
           onClick={() => {
-            //
+            redo && redo();
           }}
           title="Redo"
         >
