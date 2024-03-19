@@ -108,5 +108,5 @@ export function DrawLine({ start, end, color, width, opacity }: DrawLineProps) {
   if (!start || !end) return null;
   const [x1, y1] = getXyFromPosition(start);
   const [x2, y2] = getXyFromPosition(end);
-  return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} opacity={opacity} strokeWidth={width} />;
+  return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={colors[color]["500"]} opacity={opacity} strokeWidth={width} />;
 }
