@@ -56,6 +56,9 @@ export function Panel() {
   // do some nice keyboard shortcuts
   React.useEffect(() => {
     document.body.onkeydown = (e) => {
+      if (["INPUT", "SELECT"].includes((e.target as HTMLElement).tagName)) {
+        return;
+      }
       if (e.key === "Escape") {
         clearActivePosition();
       } else if ([1, 2, 3, 4, 5, 6, 7, 8].includes(Number(e.key))) {
