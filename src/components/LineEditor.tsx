@@ -24,8 +24,6 @@ export function LineEditor() {
   const deleteLine = useDeleteLine();
   const editLine = useEditLine();
 
-  if (!lineEditor.isOpen) return null;
-
   React.useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (lineEditor.activeAttributeEdit && e.button !== 1 && e.button !== 2) {
@@ -45,6 +43,8 @@ export function LineEditor() {
       document.body.removeEventListener("mousedown", handleClick);
     };
   }, [lineEditor, setLineEditor]);
+
+  if (!lineEditor.isOpen) return null;
 
   return (
     <>
