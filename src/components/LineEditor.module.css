@@ -1,0 +1,11 @@
+.headers > div {
+  @apply border-b border-slate-700 py-1 px-2;
+}
+
+.row > div {
+  @apply select-none border-b border-slate-700 py-1 px-2;
+}
+
+.rowActive > div {
+  @apply bg-slate-700;
+}

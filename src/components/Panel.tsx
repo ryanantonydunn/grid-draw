@@ -7,17 +7,19 @@ import {
   useDeleteImage,
   useDuplicateImage,
   useImages,
+  useLineEditor,
   useLineOptions,
   useRedo,
   useSetCanvasOption,
   useSetCurrentImage,
   useSetImageName,
+  useSetLineEditor,
   useSetLineOption,
   useUndo,
 } from "../store/hooks";
 import { ColorHue, colorHues } from "../store/types";
 import { Button } from "./atoms/Button";
-import { FormSelect } from "./atoms/FormSelect";
+import { FormSelect, FormSelectColor, FormSelectOpacity, FormSelectWidth } from "./atoms/FormSelect";
 import { FormInput } from "./atoms/FormInput";
 import Add from "@spectrum-icons/workflow/Add";
 import Delete from "@spectrum-icons/workflow/Delete";
@@ -27,6 +29,7 @@ import SaveFloppy from "@spectrum-icons/workflow/SaveFloppy";
 import Cancel from "@spectrum-icons/workflow/Cancel";
 import Undo from "@spectrum-icons/workflow/Undo";
 import Redo from "@spectrum-icons/workflow/Redo";
+import Organize from "@spectrum-icons/workflow/Organize";
 
 export function Panel() {
   const lineOptions = useLineOptions();
@@ -43,6 +46,8 @@ export function Panel() {
   const clearActivePosition = useClearActivePosition();
   const undo = useUndo();
   const redo = useRedo();
+  const lineEditor = useLineEditor();
+  const setLineEditor = useSetLineEditor();
 
   const letters1 = ["q", "w", "e", "r", "t", "y", "u", "i", "o"];
   const letters2 = ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";"];
@@ -55,7 +60,7 @@ export function Panel() {
 
   // do some nice keyboard shortcuts
   React.useEffect(() => {
-    document.body.onkeydown = (e) => {
+    document.body.addEventListener("keydown", (e) => {
       if (["INPUT", "SELECT"].includes((e.target as HTMLElement).tagName)) {
         return;
       }
@@ -68,7 +73,7 @@ export function Panel() {
       } else if (letters2.indexOf(e.key) !== -1) {
         setLineOption({ opacity: letters2.indexOf(e.key) * 0.1 + 0.1 });
       }
-    };
+    });
   }, []);
 
   return (
@@ -76,44 +81,21 @@ export function Panel() {
       {/** Line options */}
       <div className="pr-2">
         <label className="text-xs block">Width</label>
-        <FormSelect
-          className="w-14"
-          onChange={(e) => setLineOption({ width: Number(e.target.value) })}
-          value={lineOptions.width}
-        >
-          {Array.from({ length: 8 }).map((_, i) => (
-            <option key={i + 1} value={i + 1}>
-              {i + 1}
-            </option>
-          ))}
-        </FormSelect>
+        <FormSelectWidth onChange={(e) => setLineOption({ width: Number(e.target.value) })} value={lineOptions.width} />
       </div>
       <div className="pr-2">
         <label className="text-xs block">Color</label>
-        <FormSelect onChange={(e) => setLineOption({ color: e.target.value as ColorHue })} value={lineOptions.color}>
-          {colorHues.map((hue) => (
-            <option key={hue} value={hue}>
-              {hue}
-            </option>
-          ))}
-        </FormSelect>
+        <FormSelectColor
+          onChange={(e) => setLineOption({ color: e.target.value as ColorHue })}
+          value={lineOptions.color}
+        />
       </div>
       <div className="pr-2">
         <label className="text-xs block">Opacity</label>
-        <FormSelect
-          className="w-14"
+        <FormSelectOpacity
           onChange={(e) => setLineOption({ opacity: Number(e.target.value) })}
           value={lineOptions.opacity}
-        >
-          {Array.from({ length: 10 }).map((_, i) => {
-            const n = Math.round(i) * 0.1 + 0.1;
-            return (
-              <option key={n} value={n}>
-                {Math.round(n * 100)}%
-              </option>
-            );
-          })}
-        </FormSelect>
+        />
       </div>
 
       {/** Grid options */}
@@ -155,6 +137,21 @@ export function Panel() {
           title="Redo"
         >
           <Redo aria-label="redo" size="S" />
+        </Button>
+      </div>
+
+      {/** Line editor button */}
+      <div className="ml-2 mr-4 bg-slate-700 w-px self-stretch"></div>
+      <div className="pr-2">
+        <Button
+          disabled={!undo}
+          className="mr-2"
+          onClick={() => {
+            setLineEditor({ isOpen: !lineEditor.isOpen });
+          }}
+          title="Edit lines"
+        >
+          <Organize arial-label="edit lines" size="S" />
         </Button>
       </div>
 

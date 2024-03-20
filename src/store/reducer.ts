@@ -2,7 +2,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
 import colors from "tailwindcss/colors";
 import { createNewImage, getCurrentImage, getImageDuplicate, getNewLine, snapshotImageStateForUndo } from "./helpers";
-import { AppState, CanvasOptions, LineOptions, NAME_LIMIT, Position } from "./types";
+import { AppState, CanvasOptions, Line, LineEditor, LineOptions, NAME_LIMIT, Position } from "./types";
 
 const initialState: AppState = {
   currentImage: "0",
@@ -20,6 +20,11 @@ const initialState: AppState = {
     width: 1,
     color: "gray",
     opacity: 0.3,
+  },
+  lineEditor: {
+    isOpen: false,
+    activeIndex: -1,
+    activeAttributeEdit: null,
   },
 };
 
@@ -68,6 +73,21 @@ export const mainSlice = createSlice({
       if (!image) return;
       snapshotImageStateForUndo(state);
 
+      // if we are editing a lines position
+      const editingLine = image.state.present.lines[state.lineEditor.activeIndex];
+      if (state.lineEditor.activeAttributeEdit === "start" && editingLine) {
+        editingLine.start = action.payload;
+        state.lineEditor.activeAttributeEdit = null;
+        state.lineEditor.activeIndex = -1;
+        return;
+      }
+      if (state.lineEditor.activeAttributeEdit === "end" && editingLine) {
+        editingLine.end = action.payload;
+        state.lineEditor.activeAttributeEdit = null;
+        state.lineEditor.activeIndex = -1;
+        return;
+      }
+
       // if there is a new line to create
       const newLine = getNewLine(state, action.payload);
       if (newLine && image) {
@@ -102,6 +122,39 @@ export const mainSlice = createSlice({
       // move previous future to present
       image.state.present = image.state.future.splice(0, 1)[0];
     },
+    setLineEditor: (state, action: PayloadAction<Partial<LineEditor>>) => {
+      const image = getCurrentImage(state);
+      if (!image) return;
+      if (action.payload.activeAttributeEdit) {
+        snapshotImageStateForUndo(state);
+        image.state.present.activePosition = null;
+      }
+      state.lineEditor = { ...state.lineEditor, ...action.payload };
+    },
+    deleteLine: (state, action: PayloadAction<number>) => {
+      const image = getCurrentImage(state);
+      if (!image) return;
+
+      snapshotImageStateForUndo(state);
+      image.state.present.lines.splice(action.payload, 1);
+    },
+    moveLine: (state, action: PayloadAction<{ oldIndex: number; newIndex: number }>) => {
+      const image = getCurrentImage(state);
+      if (!image) return;
+
+      snapshotImageStateForUndo(state);
+      const { oldIndex, newIndex } = action.payload;
+      const { lines } = image.state.present;
+      lines.splice(newIndex, 0, lines.splice(oldIndex, 1)[0]);
+    },
+    editLine: (state, action: PayloadAction<{ i: number; line: Partial<Line> }>) => {
+      const image = getCurrentImage(state);
+      if (!image) return;
+
+      snapshotImageStateForUndo(state);
+      const { lines } = image.state.present;
+      lines[action.payload.i] = { ...lines[action.payload.i], ...action.payload.line };
+    },
   },
 });
 
@@ -117,5 +170,9 @@ export const {
   clearActivePosition,
   undo,
   redo,
+  setLineEditor,
+  deleteLine,
+  moveLine,
+  editLine,
 } = mainSlice.actions;
 export const mainReducer = mainSlice.reducer;

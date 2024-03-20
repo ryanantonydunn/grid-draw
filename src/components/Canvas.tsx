@@ -8,6 +8,7 @@ import {
   useCurrentImage,
   useGetPositionFromXy,
   useGetXyFromPosition,
+  useLineEditor,
   useLineOptions,
 } from "../store/hooks";
 import { ColorHue, Position } from "../store/types";
@@ -19,6 +20,7 @@ export function Canvas() {
   const clickPosition = useClickPosition();
   const getPositionFromXy = useGetPositionFromXy();
   const clearActivePosition = useClearActivePosition();
+  const lineEditor = useLineEditor();
 
   const [hoverPosition, setHoverPosition] = React.useState<Position | null>(null);
 
@@ -33,6 +35,28 @@ export function Canvas() {
           y: hoverPosition[1] - activePosition[1],
         }
       : null;
+
+  // Handle line we are currently editing
+  const linesWithoutEditingLine = React.useMemo(() => {
+    const lineInList = lines[lineEditor.activeIndex];
+    const newLines = [...lines];
+    if (lineInList) {
+      newLines.splice(lineEditor.activeIndex, 1);
+    }
+    return newLines;
+  }, [lines, lineEditor]);
+
+  const editingLine = React.useMemo(() => {
+    const lineInList = lines[lineEditor.activeIndex];
+    if (!lineInList) return null;
+    const line = { ...lineInList };
+    if (lineEditor.activeAttributeEdit === "start") {
+      line.start = hoverPosition || line.start;
+    } else if (lineEditor.activeAttributeEdit === "end") {
+      line.end = hoverPosition || line.end;
+    }
+    return line;
+  }, [lines, lineEditor, hoverPosition]);
 
   return (
     <>
@@ -62,7 +86,7 @@ export function Canvas() {
         }}
       >
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-          {lines.map((line, i) => (
+          {linesWithoutEditingLine.map((line, i) => (
             <DrawLine key={i} {...line} />
           ))}
           <DrawLine start={activePosition} end={hoverPosition} {...lineOptions} />
@@ -71,6 +95,14 @@ export function Canvas() {
             color={canvasOptions.selectedCircleColor}
             size={canvasOptions.selectedCircleSize}
           />
+          {lineEditor.isOpen && editingLine && (
+            <>
+              <DrawLine {...editingLine} width={editingLine.width + 8} opacity={1} colorOverride="rgba(0,0,0,0.4)" />
+              <DrawLine {...editingLine} width={editingLine.width + 6} opacity={1} colorOverride="rgba(0,0,0,0.4)" />
+              <DrawLine {...editingLine} width={editingLine.width + 4} opacity={1} colorOverride="white" />
+              <DrawLine {...editingLine} />
+            </>
+          )}
           <DrawCircle
             position={hoverPosition}
             color={canvasOptions.hoverCircleColor}
@@ -128,12 +160,24 @@ interface DrawLineProps {
   color: ColorHue;
   width: number;
   opacity: number;
+  colorOverride?: string;
 }
 
-export function DrawLine({ start, end, color, width, opacity }: DrawLineProps) {
+export function DrawLine({ start, end, color, width, opacity, colorOverride }: DrawLineProps) {
   const getXyFromPosition = useGetXyFromPosition();
   if (!start || !end) return null;
   const [x1, y1] = getXyFromPosition(start);
   const [x2, y2] = getXyFromPosition(end);
-  return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={colors[color]["500"]} opacity={opacity} strokeWidth={width} />;
+  return (
+    <line
+      x1={x1}
+      y1={y1}
+      x2={x2}
+      y2={y2}
+      stroke={colorOverride ? colorOverride : colors[color]["500"]}
+      opacity={opacity}
+      strokeWidth={width}
+      strokeLinecap="round"
+    />
+  );
 }

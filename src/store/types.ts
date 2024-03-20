@@ -65,11 +65,18 @@ export interface Image {
   };
 }
 
+export interface LineEditor {
+  isOpen: boolean;
+  activeIndex: number;
+  activeAttributeEdit: keyof Line | null;
+}
+
 export interface AppState {
   currentImage: string;
   images: Image[];
   canvasOptions: CanvasOptions;
   lineOptions: LineOptions;
+  lineEditor: LineEditor;
 }
 
 export const NAME_LIMIT = 30;

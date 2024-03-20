@@ -1,23 +1,31 @@
+import { PayloadAction } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
-import { AppState, CanvasOptions, Image, LineOptions, Position } from "./types";
 import { getCurrentImage } from "./helpers";
 import {
   addNewImage,
   clearActivePosition,
   clickPosition,
   deleteImage,
+  deleteLine,
   duplicateImage,
+  editLine,
+  moveLine,
   redo,
   setCanvasOption,
   setCurrentImage,
   setImageName,
+  setLineEditor,
   setLineOption,
   undo,
 } from "./reducer";
-import { PayloadAction } from "@reduxjs/toolkit";
+import { AppState, CanvasOptions, Image, Line, LineEditor, LineOptions, Position } from "./types";
 
 export const useCanvasOptions = () => {
   return useSelector((state: AppState) => state.canvasOptions);
+};
+
+export const useLineEditor = () => {
+  return useSelector((state: AppState) => state.lineEditor);
 };
 
 export const useLineOptions = () => {
@@ -75,6 +83,26 @@ export const useClickPosition = () => {
 export const useClearActivePosition = () => {
   const dispatch = useDispatch();
   return () => dispatch(clearActivePosition());
+};
+
+export const useSetLineEditor = () => {
+  const dispatch = useDispatch();
+  return (l: Partial<LineEditor>) => dispatch(setLineEditor(l));
+};
+
+export const useDeleteLine = () => {
+  const dispatch = useDispatch();
+  return (i: number) => dispatch(deleteLine(i));
+};
+
+export const useMoveLine = () => {
+  const dispatch = useDispatch();
+  return (i1: number, i2: number) => dispatch(moveLine({ oldIndex: i1, newIndex: i2 }));
+};
+
+export const useEditLine = () => {
+  const dispatch = useDispatch();
+  return (i: number, line: Partial<Line>) => dispatch(editLine({ i, line }));
 };
 
 export const useUndo = (): (() => PayloadAction) | null => {
