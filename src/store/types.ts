@@ -69,6 +69,7 @@ export interface LineEditor {
   isOpen: boolean;
   activeIndex: number;
   activeAttributeEdit: keyof Line | null;
+  activeHover: "start" | "end";
 }
 
 export interface AppState {

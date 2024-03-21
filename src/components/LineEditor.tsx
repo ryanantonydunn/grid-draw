@@ -79,7 +79,12 @@ export function LineEditor() {
               }
             }}
           >
-            <div onClick={() => setLineEditor({ activeIndex: i, activeAttributeEdit: "start" })}>
+            <div
+              onClick={() => setLineEditor({ activeIndex: i, activeAttributeEdit: "start" })}
+              onMouseEnter={() => {
+                setLineEditor({ activeHover: "start" });
+              }}
+            >
               <span
                 className={
                   lineEditor.activeIndex === i && lineEditor.activeAttributeEdit === "start"
@@ -90,7 +95,12 @@ export function LineEditor() {
                 {line.start[0]} / {line.start[1]}
               </span>
             </div>
-            <div onClick={() => setLineEditor({ activeIndex: i, activeAttributeEdit: "end" })}>
+            <div
+              onClick={() => setLineEditor({ activeIndex: i, activeAttributeEdit: "end" })}
+              onMouseEnter={() => {
+                setLineEditor({ activeHover: "end" });
+              }}
+            >
               <span
                 className={
                   lineEditor.activeIndex === i && lineEditor.activeAttributeEdit === "end"

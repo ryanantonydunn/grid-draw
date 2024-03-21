@@ -25,6 +25,7 @@ const initialState: AppState = {
     isOpen: false,
     activeIndex: -1,
     activeAttributeEdit: null,
+    activeHover: "start",
   },
 };
 

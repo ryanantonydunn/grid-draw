@@ -101,6 +101,7 @@ export function Canvas() {
               <DrawLine {...editingLine} width={editingLine.width + 6} opacity={1} colorOverride="rgba(0,0,0,0.4)" />
               <DrawLine {...editingLine} width={editingLine.width + 4} opacity={1} colorOverride="white" />
               <DrawLine {...editingLine} />
+              <DrawCircle position={editingLine[lineEditor.activeHover]} color={"gray"} size={editingLine.width + 8} />
             </>
           )}
           <DrawCircle
